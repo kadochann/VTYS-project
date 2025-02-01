@@ -4,7 +4,7 @@ import chromadb
 from chromadb.config import Settings
 
 # 1. Excel Dosyasını Oku
-file_path = r'C:\Users\Casper\Desktop\VTYS_final_dosyalar\grpA_10_codes\grpA_10_codes\ornek_veri.xlsx' # Verilerin bulunduğu excel dosyasının yolu.
+file_path = 'C:/Users/User/Desktop/Deneme/ÖrnekVeri.xlsx' # Verilerin bulunduğu excel dosyasının yolu.
 data = pd.read_excel(file_path)
 
 # 2. İlgili Sütunları Seç

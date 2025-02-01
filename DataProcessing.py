@@ -21,7 +21,7 @@ def clean_text(text):
     return text
 
 # Veri yükleme
-file_path = "ornek_veri.xlsx" #ornek verinin yolu, klasor icinde yer alıyor 
+file_path = "veri.xlsx" #ornek verinin yolu, klasor icinde yer alıyor 
 data = pd.read_excel(file_path)
 
 # Temizleme işlemi

@@ -12,25 +12,32 @@ import secrets
 import os
 import xml.etree.ElementTree as ET
 from tkinter import messagebox
+from dotenv import load_dotenv
 
 # Flask Uygulaması (OAuth İşlemleri İçin)
 app = Flask(__name__)
 app.secret_key = "random_secret_key"
 
+load_dotenv()  
+chromadb_path = os.getenv('CHROMADB_PATH')
+xml_folder_path = os.getenv('XML_FOLDER_PATH')
+genai_key=os.getenv('GENAI_API_KEY'),
 oauth = OAuth(app)
 oauth.register(
     name='google',
-    client_id='915622909991-q8gnbjg5jirsq3rq8hogqei0qhnp438e.apps.googleusercontent.com',
-    client_secret='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',
+    client_id=os.getenv('GOOGLE_CLIENT_ID'),  # Google Client ID
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),  # Google Client Secret
+    genai_key=os.getenv('GENAI_API_KEY'),  
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
         'scope': 'openid email profile',
     }
 )
 
+
 # XML Kaydetme Fonksiyonu
 def save_to_xml(user_email, query, response):
-    filename = f"{user_email.replace('@', '_')}.xml"
+    filename = os.path.join(xml_folder_path, f"{user_email.replace('@', '_')}.xml")
     root = ET.Element("history") if not os.path.exists(filename) else ET.parse(filename).getroot()
 
     entry = ET.SubElement(root, "entry")
@@ -42,7 +49,7 @@ def save_to_xml(user_email, query, response):
 
 # XML Okuma Fonksiyonu
 def read_xml(user_email):
-    filename = f"{user_email.replace('@', '_')}.xml"
+    filename = os.path.join(xml_folder_path, f"{user_email.replace('@', '_')}.xml")
     if not os.path.exists(filename):
         return []
 
@@ -51,7 +58,7 @@ def read_xml(user_email):
 
 # XML Temizleme Fonksiyonu
 def clear_xml(user_email):
-    filename = f"{user_email.replace('@', '_')}.xml"
+    filename = os.path.join(xml_folder_path, f"{user_email.replace('@', '_')}.xml")
     if os.path.exists(filename):
         os.remove(filename)
 
@@ -110,7 +117,7 @@ def logout():
     return redirect('/')
 
 # Google Generative AI API anahtarını yapılandır
-genai.configure(api_key="AIzaSyAOD73dXGPeN9d9rxlGNUTSCaPFR5GhPck")
+genai.configure(aapi_key=genai_key)
 
 def build_chatBot(system_instruction):
     model = genai.GenerativeModel('gemini-1.5-flash-latest', system_instruction=system_instruction)
@@ -142,7 +149,7 @@ Your goal is to deliver accurate, context-aware technical support while maintain
 RAG_LLM = generateRAG_LLM(system_prompt)
 
 # ChromaDB bağlantısını oluştur
-client = chromadb.PersistentClient(path=r"C:\Users\Casper\Desktop\VTYS_final_dosyalar\grpA_10_codes\grpA_10_codes\Database\chroma_db") # Vektör veri tabanının dizin yolunu gir.
+client = chromadb.PersistentClient(path=chromadb_path) # Vektör veri tabanının dizin yolunu gir.
 collection_name = "equipment_issues"
 collection = client.get_collection(name=collection_name)
 
@@ -171,7 +178,7 @@ def handle_query():
             response = "CHATBOT YANITI:\n" + gemini_response if gemini_response else "Gemini API'den sonuç alınamadı."
             save_to_xml(user_data['email'], query_input.get(), response)  # Sorguyu ve yanıtı XML dosyasına kaydedin
         else:
-            prompt = f"Sorgu: {user_query}\n\nDaha önce böyle bir sorun yaşanmadı."
+            prompt = f"Sorgu: {user_query}\n\nDaha önce böyle bir sorun yaşanmadı, bunu belirt ve genel bir çözüm öner."
             gemini_response = generate_LLM_answer(prompt, "", RAG_LLM)
 
             response = "ChromaDB'den sonuç bulunamadı.\n" + (gemini_response if gemini_response else "Gemini API'den sonuç alınamadı.")

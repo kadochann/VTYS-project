@@ -1,2 +1,2 @@
-# VTYS-project
-Veri Tabanı Yönettim Sistemleri dersinde grup arkadaşlarımla yaptığım proje 
+# database_management_project
+ üretim veri tabanı yönetim sistemi
